@@ -274,6 +274,43 @@ services:
     ports:
       - "9090:9090"
 
+  # News Supervisor App
+  news-supervisor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.news-supervisor
+    image: ghcr.io/agntcy/coffee-agntcy/news-supervisor:latest
+    container_name: news-supervisor
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
+      - TRANSPORT_SERVER_ENDPOINT=nats://nats:4222  # Force Docker service name, ignore .env
+      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-}
+    ports:
+      - "8001:8001"
+    depends_on:
+      - nats
+
+  # News Scraper Worker
+  news-scraper:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.news-scraper
+    image: ghcr.io/agntcy/coffee-agntcy/news-scraper:latest
+    container_name: news-scraper
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
+      - TRANSPORT_SERVER_ENDPOINT=nats://nats:4222  # Force Docker service name, ignore .env
+      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-}
+      - ENABLE_HTTP=true
+    ports:
+      - "9001:9001"
+    depends_on:
+      - nats
+
   mce-api-layer:
     image: ghcr.io/agntcy/obs-api:0.1.1
     container_name: lungo-mce-api-layer

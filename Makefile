@@ -20,6 +20,8 @@ help:
 	@echo "  weather-mcp         - Run weather MCP server"
 	@echo "  payment-mcp         - Run payment MCP server"
 	@echo "  helpdesk            - Run logistics helpdesk"
+	@echo "  news-supervisor      - Run news supervisor"
+	@echo "  news-scraper         - Run news scraper worker"
 
 .PHONY: logistics-supervisor
 logistics-supervisor:
@@ -64,3 +66,11 @@ payment-mcp:
 .PHONY: helpdesk
 helpdesk:
 	$(UV) agents/logistics/helpdesk/server.py
+
+.PHONY: news-supervisor
+news-supervisor:
+	$(UV) agents/supervisors/news/main.py
+
+.PHONY: news-scraper
+news-scraper:
+	$(UV) agents/news/scraper/server.py
