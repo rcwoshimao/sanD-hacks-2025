@@ -85,9 +85,9 @@ services:
       dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.auction-supervisor
     image: ghcr.io/agntcy/coffee-agntcy/auction-supervisor:latest
     container_name: auction-supervisor
-    volumes:
-      # Mount local git metadata so /build/info can derive latest tag/date in dev
-      - ../../../.git:/app/.git:ro
+    # volumes:
+    #   # Mount local git metadata so /build/info can derive latest tag/date in dev
+    #   - ../../../.git:/app/.git:ro
     env_file:
       - .env
     environment:
