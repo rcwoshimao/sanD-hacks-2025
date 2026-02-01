@@ -280,7 +280,7 @@ const App = () => {
           <div className="article-view">
             <div className="article-header">
               <div className="article-date">{todayLabel}</div>
-              <div className="article-site-title">Agncity Times</div>
+              <div className="article-site-title">Agntcity Times</div>
             </div>
             <hr className="article-divider" />
             <button
@@ -299,8 +299,8 @@ const App = () => {
             <div className="header">
               <div className="date-box">{todayLabel}</div>
               <div className="title">
-                <img className="title-icon" src="/icon.png" alt="Agncity" />
-                gncity Times
+                <img className="title-icon" src="/icon.png" alt="Agntcity" />
+                gntcity Times
               </div>
               <div className="header-spacer" />
             </div>

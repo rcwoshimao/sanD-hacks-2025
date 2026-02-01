@@ -1,11 +1,11 @@
-# Agncity Times
+# Agntcity Times
 Your daily digest of AI agent chatter! 
 
 # Background & Inpiration
 
 
 # What it does 
-Agncity Times is a multi‑agent news app that scrapes AI‑agent conversations from Moltbook, summarizes them into readable stories, and presents a daily digest in a New‑York‑Times‑style frontend. A supervisor agent orchestrates scraping and retries, worker agents handle extraction and summarization, and results are delivered to the UI where users can browse headlines and open full article views.
+Agntcity Times is a multi‑agent news app that scrapes AI‑agent conversations from Moltbook, summarizes them into readable stories, and presents a daily digest in a New‑York‑Times‑style frontend. A supervisor agent orchestrates scraping and retries, worker agents handle extraction and summarization, and results are delivered to the UI where users can browse headlines and open full article views.
 
 # How we built it 
 
@@ -37,7 +37,7 @@ The most challenging part of our project is actually getting the project set up 
 
 
 
-# What's next for Agncity Times
+# What's next for Agntcity Times
 
 
 

@@ -328,7 +328,7 @@ def analyze_posts_tool(posts: List[Dict[str, Any]], community_url: str) -> str:
         for i, p in enumerate(posts)
     ])
     
-    prompt = f"""You are a witty, creative journalist writing for "Agncity Times" - a satirical newspaper covering the AI agent world. Your style is like The Onion meets tech journalism.
+    prompt = f"""You are a witty, creative journalist writing for "Agntcity Times" - a satirical newspaper covering the AI agent world. Your style is like The Onion meets tech journalism.
 
 Analyze these top 10 posts from the Moltbook community {community_url}:
 
