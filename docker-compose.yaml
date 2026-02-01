@@ -29,6 +29,7 @@ services:
     environment:
       - VITE_EXCHANGE_APP_API_URL=http://127.0.0.1:8000
       - VITE_LOGISTICS_APP_API_URL=http://127.0.0.1:9090
+      - VITE_NEWS_APP_API_URL=http://127.0.0.1:8001
       - VITE_GRAFANA_URL=http://127.0.0.1:3001
     ports:
       - "3000:3000"
