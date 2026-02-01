@@ -9,14 +9,15 @@ body,
 #root {
     margin: 0;
     padding: 0;
-  height: 100%;
+  min-height: 100%;
   width: 100%;
   font-family: Arial, sans-serif;
+  background-color: rgb(240, 241, 229);
 }
 
 .app {
   display: flex;
-  height: 100%;
+  min-height: 100vh;
   align-items: flex-start;
   justify-content: center;
   padding-top: 24px;
@@ -28,6 +29,8 @@ body,
   font-weight: 700;
   text-align: center;
   width: 100%;
+  min-height: 100%;
+  background-color: rgb(240, 241, 229);
 }
 
 .header {
@@ -75,7 +78,7 @@ body,
 }
 
 .split-left {
-  flex: 0 0 75%;
+  flex: 0 0 70%;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -106,12 +109,45 @@ body,
   text-align: left;
   display: flex;
   flex-direction: column;
+  gap: 0;
+  justify-content: space-between;
+  align-self: stretch;
+}
+
+.extra-articles {
+  display: flex;
+  justify-content: space-between;
   gap: 16px;
+  width: 90%;
+  margin: 0 auto 18px;
+}
+
+.extra-articles .headline-item {
+  flex: 1 1 0;
 }
 
 .headline-item {
+  display: block;
   padding-bottom: 8px;
 
+}
+
+.headline-item:link,
+.headline-item:visited,
+.headline-item:hover,
+.headline-item:active {
+  cursor: pointer; 
+  color: inherit;
+  text-decoration: none;
+}
+
+.headline-button {
+  background: transparent;
+  border: 0;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
 }
 
 .headline-item:last-child {
@@ -123,7 +159,7 @@ body,
   font-family: "Playfair Display", serif;
   text-align: left; 
   font-size: 24px;
-  font-weight: 700;
+    font-weight: 700;
   margin: 8px 0px;
 }
 
@@ -152,6 +188,83 @@ body,
   display: block;
   width: 100%;
   height: auto;
+}
+
+.article-view {
+  width: 90%;
+  margin: 0 auto 18px;
+  text-align: left;
+}
+
+.article-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+
+.article-site-title {
+  font-family: "Jacquard 24", "Old English Text MT", serif;
+  font-size: 28px;
+}
+
+.article-date {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.article-divider {
+  border: 0;
+  border-top: 1px solid #000;
+  margin: 6px 0 14px;
+}
+
+.article-page .article-view {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.article-page .article-title {
+  font-size: 32px;
+}
+
+.article-page .article-summary {
+  font-size: 20px;
+}
+
+.article-page .article-content {
+  font-size: 18px;
+  line-height: 1.6;
+}
+
+.back-button {
+  background: transparent;
+  border: 1px solid #000;
+  padding: 6px 10px;
+  cursor: pointer;
+  margin-bottom: 16px;
+}
+
+.article-title {
+  font-family: "Playfair Display", serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.article-summary {
+  font-family: "Playfair Display", serif;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.article-content {
+  font-family: "Playfair Display", serif;
+  font-weight: 1; 
+  font-size: 16px;
+  line-height: 1.5;
+  white-space: pre-line;
 }
 
 .split-line {
