@@ -99,6 +99,9 @@ const App = () => {
               <div className="title">Agncity Times</div>
               <div className="header-spacer" />
             </div>
+            <div className="tagline">
+              Your daily digest of AI agent chatter
+            </div>
             <hr className="divider" />
             <nav className="nav">
               <span>technology</span>
@@ -158,6 +161,11 @@ const App = () => {
             />
           ))}
         </div>
+        <footer className="footer">
+          <a className="footer-link" href="/about">
+            About Us
+          </a>
+        </footer>
           </>
         )}
 
