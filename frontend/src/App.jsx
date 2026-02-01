@@ -396,7 +396,7 @@ const App = () => {
                 onClick={handleForceRefresh}
                 disabled={loading}
               >
-                🔄 Refresh News
+                🔄 Refresh News (every 24h)
               </button>
             </footer>
           </>
