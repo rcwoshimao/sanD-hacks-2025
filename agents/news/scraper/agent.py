@@ -19,6 +19,9 @@ logger = logging.getLogger("lungo.news_scraper.agent")
 litellm_proxy_base_url = os.getenv("LITELLM_PROXY_BASE_URL")
 litellm_proxy_api_key = os.getenv("LITELLM_PROXY_API_KEY")
 
+if not LLM_MODEL:
+    raise ValueError("LLM_MODEL is not configured. Please set LLM_MODEL in your .env file.")
+
 if litellm_proxy_base_url and litellm_proxy_api_key:
     logger.info(f"Using LLM via LiteLLM proxy: {litellm_proxy_base_url}")
     llm = AzureOpenAI(
@@ -27,6 +30,7 @@ if litellm_proxy_base_url and litellm_proxy_api_key:
         api_key=litellm_proxy_api_key
     )
 else:
+    logger.info(f"Using LiteLLM with model: {LLM_MODEL}")
     llm = LiteLLM(LLM_MODEL)
 
 # --- 1. Define Intent Type ---
@@ -50,7 +54,7 @@ def handle_scrape_tool(user_message: str) -> str:
     urls = re.findall(url_pattern, user_message)
     
     if not urls:
-        return "No URL found in the request. Please provide a URL to scrape."
+        return "⚠️ SCRAPER FALLBACK: No URL found in the request. Please provide a URL to scrape."
     
     url = urls[0]
     logger.info(f"Scraping URL: {url}")
@@ -140,7 +144,17 @@ class ScraperAgent:
         try:
             # Use the root agent to process the prompt
             response = await self.agent.achat(prompt)
-            return response.message.content
+            logger.debug(f"Response type: {type(response)}, Response: {response}")
+            # Handle different response formats
+            if hasattr(response, 'message') and hasattr(response.message, 'content'):
+                return response.message.content
+            elif hasattr(response, 'content'):
+                return response.content
+            elif isinstance(response, str):
+                return response
+            else:
+                logger.error(f"Unexpected response format: {response}")
+                return str(response)
         except Exception as e:
-            logger.error(f"Error in scraper agent: {e}")
-            return f"Error processing request: {str(e)}"
+            logger.error(f"Error in scraper agent: {e}", exc_info=True)
+            return f"⚠️ SCRAPER ERROR FALLBACK: Error processing request: {str(e)}"

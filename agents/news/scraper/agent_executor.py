@@ -73,7 +73,7 @@ class ScraperAgentExecutor(AgentExecutor):
             await event_queue.enqueue_event(task)
 
         try:
-            output = await self.agent.llama_index_invoke(prompt)
+            output = await self.agent.ainvoke(prompt)
         
             message = Message(
                 message_id=str(uuid4()),
@@ -86,7 +86,7 @@ class ScraperAgentExecutor(AgentExecutor):
 
             await event_queue.enqueue_event(message)            
         except Exception as e:
-            logger.error(f'An error occurred while streaming the yield estimate response: {e}')
+            logger.error(f'An error occurred while processing the scraper request: {e}', exc_info=True)
             raise ServerError(error=InternalError()) from e
         
     async def cancel(

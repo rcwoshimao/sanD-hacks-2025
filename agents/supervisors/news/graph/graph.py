@@ -42,7 +42,7 @@ class NewsGraph:
         self.graph = self.build_graph()
         self.max_retries = 3
         self.rate_limit_delay = 1.0  # seconds between requests
-    
+
     @graph(name="news_graph")
     def build_graph(self) -> CompiledStateGraph:
         """
@@ -55,10 +55,10 @@ class NewsGraph:
         - retry_failed: Handle retries for failed URLs
 
         Returns:
-            CompiledGraph: A fully compiled LangGraph instance ready for execution.
+        CompiledGraph: A fully compiled LangGraph instance ready for execution.
         """
         workflow = StateGraph(GraphState)
-        
+
         # Define nodes
         workflow.add_node(NodeStates.SUPERVISOR, self._supervisor_node)
         workflow.add_node(NodeStates.ASSIGN_URLS, self._assign_urls_node)
@@ -102,12 +102,12 @@ class NewsGraph:
         
         if not valid_urls:
             return {
-                "messages": [AIMessage(content="No valid URLs found. Please provide URLs to scrape.")],
+                "messages": [AIMessage(content="⚠️ FALLBACK: No valid URLs found. Please provide URLs to scrape.")],
                 "next_node": END
             }
-        
+
         logger.info(f"Supervisor initialized with {len(valid_urls)} URLs to scrape")
-        
+
         # Initialize tracking
         return {
             "urls_to_scrape": valid_urls,
@@ -199,9 +199,9 @@ class NewsGraph:
                 f"URL: {r['url']}\nContent: {r['content']}" 
                 for r in results
             ])
-            response_message = f"Successfully scraped and summarized {len(results)} URL(s):\n\n{formatted_results}"
+            response_message = f"✅ SUCCESS: Successfully scraped and summarized {len(results)} URL(s):\n\n{formatted_results}"
         else:
-            response_message = "No URLs were successfully processed."
+            response_message = "⚠️ FALLBACK: No URLs were successfully processed. This indicates the scraper may have failed."
         
         return {
             "all_results": results,
@@ -264,7 +264,7 @@ class NewsGraph:
     async def serve(self, prompt: str, urls: Optional[List[str]] = None) -> str:
         """
         Processes the input prompt and returns a complete response from the graph execution.
-        
+
         Args:
             prompt (str): The input prompt to be processed by the graph.
             urls (Optional[List[str]]): Optional list of URLs to scrape.
@@ -282,10 +282,10 @@ class NewsGraph:
             # Prepare initial state with all required keys
             initial_state = {
                 "messages": [
-                    {
-                        "role": "user",
-                        "content": prompt,
-                    }
+                {
+                    "role": "user",
+                    "content": prompt,
+                }
                 ],
                 "urls_to_scrape": self._validate_urls(urls) if urls else [],
                 "urls_in_progress": {},
@@ -318,11 +318,11 @@ class NewsGraph:
         except Exception as e:
             logger.error(f"Error in serve method: {e}")
             raise Exception(str(e))
-    
+
     async def streaming_serve(self, prompt: str, urls: Optional[List[str]] = None):
         """
         Streams the graph execution using LangGraph's astream_events API.
-        
+
         Args:
             prompt (str): The input prompt to be processed by the graph.
             urls (Optional[List[str]]): Optional list of URLs to scrape.
@@ -332,7 +332,7 @@ class NewsGraph:
         """
         try:
             logger.debug(f"Received streaming prompt: {prompt}, URLs: {urls}")
-
+            
             # Validate input prompt
             if not isinstance(prompt, str) or not prompt.strip():
                 raise ValueError("Prompt must be a non-empty string.")

@@ -135,6 +135,10 @@ services:
       - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-}
     ports:
       - "8001:8001"
+    volumes:
+      - ./agents/supervisors/news:/app/agents/supervisors/news:ro
+      - ./common:/app/common:ro
+      - ./config:/app/config:ro
     depends_on:
       - nats
 
@@ -154,6 +158,10 @@ services:
       - ENABLE_HTTP=true
     ports:
       - "9001:9001"
+    volumes:
+      - ./agents/news:/app/agents/news:ro
+      - ./common:/app/common:ro
+      - ./config:/app/config:ro
     depends_on:
       - nats
 
