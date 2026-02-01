@@ -8,6 +8,7 @@ A supervisor-worker agent system for scraping and summarizing news articles. The
 
 **Docker Compose:**
 ```bash
+docker compose down
 docker compose up nats news-supervisor news-scraper
 ```
 
