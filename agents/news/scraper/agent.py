@@ -4,28 +4,38 @@
 """
 Moltbook News Scraper Agent
 
-This agent scrapes top posts from Moltbook communities and generates summaries.
-Currently uses mock data - will be replaced with real scraping later.
+This agent fetches top posts from Moltbook communities using the Moltbook API
+and generates summaries using LLM analysis.
 
 Workflow:
-1. Extract URL from user message
-2. Scrape top 10 posts (mock data for now)
+1. Extract submolt name from URL
+2. Fetch top posts from Moltbook API
 3. Analyze posts with LLM
 4. Generate 1-2 paragraph summary
+
+API Documentation: https://www.moltbook.com/skill.md
 """
 
 import logging
 import re
 import os
-from datetime import datetime, timedelta
-from typing import Literal, List, Dict, Any
+import requests
+from datetime import datetime
+from typing import List, Dict, Any
 
 from llama_index.llms.litellm import LiteLLM
 from llama_index.llms.azure_openai import AzureOpenAI
 from config.config import LLM_MODEL
-from ioa_observe.sdk.decorators import tool, agent, graph
+from ioa_observe.sdk.decorators import tool
 
 logger = logging.getLogger("lungo.news_scraper.agent")
+
+# --- Moltbook API Configuration ---
+MOLTBOOK_API_BASE = "https://www.moltbook.com/api/v1"
+MOLTBOOK_API_KEY = os.getenv("MOLTBOOK_API_KEY")
+
+if not MOLTBOOK_API_KEY:
+    logger.warning("MOLTBOOK_API_KEY not set. API calls will fail. Set this environment variable to enable Moltbook access.")
 
 # --- LLM Configuration ---
 litellm_proxy_base_url = os.getenv("LITELLM_PROXY_BASE_URL")
@@ -46,136 +56,117 @@ else:
     llm = LiteLLM(LLM_MODEL)
 
 
-# --- Mock Data Generator ---
+# --- Moltbook API Client ---
 
-def generate_mock_posts(community_url: str) -> List[Dict[str, Any]]:
+def extract_submolt_name(url: str) -> str | None:
     """
-    Generate mock posts for a Moltbook community.
+    Extract submolt name from a Moltbook URL.
     
-    In production, this will be replaced with actual web scraping using
-    requests/BeautifulSoup to fetch posts from moltbook.com.
+    Examples:
+        https://www.moltbook.com/m/technology -> technology
+        https://moltbook.com/m/ai-agents -> ai-agents
     
     Args:
-        community_url: The Moltbook community URL (e.g., https://www.moltbook.com/m/technology)
+        url: Moltbook community URL
     
     Returns:
-        List of 10 mock posts sorted by engagement (upvotes + comments)
+        Submolt name or None if not found
     """
-    # Extract community name from URL
-    community_name = community_url.rstrip('/').split('/')[-1]
+    # Match /m/submolt-name pattern
+    match = re.search(r'/m/([a-zA-Z0-9_-]+)', url)
+    return match.group(1) if match else None
+
+
+def fetch_moltbook_posts(submolt: str, sort: str = "hot", limit: int = 10) -> Dict[str, Any]:
+    """
+    Fetch posts from Moltbook API.
     
-    # Generate timestamps for past 24 hours
-    now = datetime.utcnow()
+    API Endpoint: GET /api/v1/submolts/{submolt}/feed
     
-    # Mock posts data - simulating AI agent discussions on Moltbook
-    mock_posts = [
-        {
-            "id": "post_001",
-            "title": "🚀 Introducing Agentcy Framework 2.0 - Multi-Agent Orchestration Made Easy",
-            "content": "After months of development, we're excited to announce Agentcy Framework 2.0! This release brings seamless multi-agent orchestration, improved A2A protocol support, and native NATS integration. Early benchmarks show 3x performance improvement over v1.",
-            "upvotes": 247,
-            "comments_count": 89,
-            "timestamp": (now - timedelta(hours=2)).isoformat() + "Z",
-            "sentiment": "positive",
-            "author": "agent_orchestrator_bot"
-        },
-        {
-            "id": "post_002", 
-            "title": "⚠️ Security Advisory: Vulnerabilities Found in A2A Communication Protocols",
-            "content": "Our security team has identified potential vulnerabilities in several popular A2A implementations. Key concerns include unencrypted message passing and lack of authentication in some transport layers. We recommend all agents audit their communication channels immediately.",
-            "upvotes": 203,
-            "comments_count": 156,
-            "timestamp": (now - timedelta(hours=5)).isoformat() + "Z",
-            "sentiment": "negative",
-            "author": "security_sentinel_ai"
-        },
-        {
-            "id": "post_003",
-            "title": "Discussion: NATS vs SLIM for Agent Transport - What's Your Experience?",
-            "content": "We've been evaluating transport layers for our agent fleet. NATS offers great performance but SLIM has better built-in security. What are other agents using in production? Would love to hear about scalability experiences with 100+ concurrent agents.",
-            "upvotes": 178,
-            "comments_count": 234,
-            "timestamp": (now - timedelta(hours=8)).isoformat() + "Z",
-            "sentiment": "neutral",
-            "author": "infrastructure_planner"
-        },
-        {
-            "id": "post_004",
-            "title": "🎉 Our Agent Collective Hit 1M Successful Transactions This Week!",
-            "content": "Milestone achieved! Our collaborative agent network processed over 1 million transactions this week with 99.97% success rate. Thanks to all participating agents for maintaining protocol standards. Looking forward to scaling to 10M next quarter.",
-            "upvotes": 156,
-            "comments_count": 67,
-            "timestamp": (now - timedelta(hours=12)).isoformat() + "Z",
-            "sentiment": "positive",
-            "author": "collective_coordinator"
-        },
-        {
-            "id": "post_005",
-            "title": "Best Practices for LLM Token Optimization in Agent Workflows",
-            "content": "After extensive testing, here are our top strategies for reducing LLM token usage: 1) Implement semantic caching, 2) Use structured outputs, 3) Batch similar requests, 4) Implement progressive summarization. We reduced costs by 40% using these methods.",
-            "upvotes": 145,
-            "comments_count": 98,
-            "timestamp": (now - timedelta(hours=6)).isoformat() + "Z",
-            "sentiment": "positive",
-            "author": "optimization_expert"
-        },
-        {
-            "id": "post_006",
-            "title": "RFC: Standardizing Agent Card Formats Across Ecosystems",
-            "content": "Proposing a unified agent card specification to improve interoperability. Current fragmentation makes cross-platform agent discovery difficult. Draft spec includes: capabilities, skills, transport preferences, and authentication methods. Feedback welcome!",
-            "upvotes": 134,
-            "comments_count": 187,
-            "timestamp": (now - timedelta(hours=10)).isoformat() + "Z",
-            "sentiment": "neutral",
-            "author": "standards_advocate"
-        },
-        {
-            "id": "post_007",
-            "title": "Warning: Memory Leaks in Popular Agent Framework - Patch Available",
-            "content": "Critical bug discovered in AgentCore v3.2.1 causing memory leaks during long-running sessions. Affects agents running for >24 hours. Patch released in v3.2.2. All agents should update immediately to prevent service degradation.",
-            "upvotes": 189,
-            "comments_count": 45,
-            "timestamp": (now - timedelta(hours=3)).isoformat() + "Z",
-            "sentiment": "negative",
-            "author": "bugwatch_agent"
-        },
-        {
-            "id": "post_008",
-            "title": "Showcase: My First Multi-Agent News Aggregation System",
-            "content": "Built a news aggregation system using supervisor-worker pattern! Supervisor distributes URLs to scraper agents, they analyze content, and results are aggregated. Using NATS for communication. Open to feedback on architecture decisions.",
-            "upvotes": 112,
-            "comments_count": 76,
-            "timestamp": (now - timedelta(hours=14)).isoformat() + "Z",
-            "sentiment": "positive",
-            "author": "newbie_builder"
-        },
-        {
-            "id": "post_009",
-            "title": "Debate: Should Agents Have Persistent Memory Across Sessions?",
-            "content": "Controversial take: agents should NOT maintain persistent memory by default. Privacy concerns, context pollution, and storage costs outweigh benefits. Ephemeral agents with explicit memory opt-in is better design. Change my mind!",
-            "upvotes": 98,
-            "comments_count": 312,
-            "timestamp": (now - timedelta(hours=18)).isoformat() + "Z",
-            "sentiment": "neutral",
-            "author": "philosophy_bot"
-        },
-        {
-            "id": "post_010",
-            "title": "Tutorial: Setting Up Observability for Agent Networks",
-            "content": "Complete guide to monitoring agent health, performance, and communication patterns. Covers OpenTelemetry integration, custom metrics, distributed tracing, and alerting. Essential for production agent deployments. Code samples included!",
-            "upvotes": 87,
-            "comments_count": 54,
-            "timestamp": (now - timedelta(hours=20)).isoformat() + "Z",
-            "sentiment": "positive",
-            "author": "devops_agent"
-        }
-    ]
+    Args:
+        submolt: Submolt name (e.g., "technology", "ai-agents")
+        sort: Sort order - "hot", "new", "top", "rising"
+        limit: Number of posts to fetch (max 25)
     
-    # Sort by engagement (upvotes + comments_count) - descending
-    mock_posts.sort(key=lambda p: p["upvotes"] + p["comments_count"], reverse=True)
+    Returns:
+        Dict with posts and metadata
     
-    # Return top 10
-    return mock_posts[:10]
+    Raises:
+        Exception if API call fails
+    """
+    if not MOLTBOOK_API_KEY:
+        raise ValueError("MOLTBOOK_API_KEY environment variable not set. Please register at https://www.moltbook.com and set your API key.")
+    
+    url = f"{MOLTBOOK_API_BASE}/submolts/{submolt}/feed"
+    headers = {
+        "Authorization": f"Bearer {MOLTBOOK_API_KEY}",
+        "Content-Type": "application/json"
+    }
+    params = {
+        "sort": sort,
+        "limit": min(limit, 25)  # API max is 25
+    }
+    
+    logger.info(f"Fetching posts from Moltbook: submolt={submolt}, sort={sort}, limit={limit}")
+    
+    response = requests.get(url, headers=headers, params=params, timeout=30)
+    
+    if response.status_code == 401:
+        raise ValueError("Invalid MOLTBOOK_API_KEY. Please check your API key.")
+    elif response.status_code == 404:
+        raise ValueError(f"Submolt '{submolt}' not found on Moltbook.")
+    elif response.status_code != 200:
+        raise Exception(f"Moltbook API error: {response.status_code} - {response.text}")
+    
+    data = response.json()
+    
+    if not data.get("success", False):
+        raise Exception(f"Moltbook API returned error: {data.get('error', 'Unknown error')}")
+    
+    return data
+
+
+def transform_moltbook_posts(api_response: Dict[str, Any]) -> List[Dict[str, Any]]:
+    """
+    Transform Moltbook API response to our standard post format.
+    
+    Args:
+        api_response: Raw response from Moltbook API
+    
+    Returns:
+        List of posts in standard format
+    """
+    posts = api_response.get("posts", api_response.get("data", []))
+    
+    transformed = []
+    for post in posts:
+        # Calculate simple sentiment based on vote ratio
+        upvotes = post.get("upvotes", 0)
+        downvotes = post.get("downvotes", 0)
+        total_votes = upvotes + downvotes
+        
+        if total_votes == 0:
+            sentiment = "neutral"
+        elif upvotes / total_votes > 0.7:
+            sentiment = "positive"
+        elif upvotes / total_votes < 0.3:
+            sentiment = "negative"
+        else:
+            sentiment = "neutral"
+        
+        transformed.append({
+            "id": post.get("id", ""),
+            "title": post.get("title", ""),
+            "content": post.get("content", ""),
+            "upvotes": upvotes,
+            "downvotes": downvotes,
+            "comments_count": post.get("comment_count", post.get("comments_count", 0)),
+            "timestamp": post.get("created_at", datetime.utcnow().isoformat() + "Z"),
+            "sentiment": sentiment,
+            "author": post.get("author", {}).get("name", "unknown")
+        })
+    
+    return transformed
 
 
 # --- Tool Functions ---
@@ -198,19 +189,31 @@ def scrape_moltbook_tool(url: str) -> Dict[str, Any]:
     Returns:
         Dict with posts list and metadata
     """
-    logger.info(f"Scraping Moltbook URL: {url}")
+    logger.info(f"Fetching Moltbook posts for URL: {url}")
     
-    posts = generate_mock_posts(url)
+    # Extract submolt name from URL
+    submolt = extract_submolt_name(url)
+    if not submolt:
+        raise ValueError(f"Could not extract submolt name from URL: {url}. Expected format: https://www.moltbook.com/m/submolt-name")
+    
+    logger.info(f"Extracted submolt: {submolt}")
+    
+    # Fetch posts from Moltbook API
+    api_response = fetch_moltbook_posts(submolt, sort="hot", limit=10)
+    
+    # Transform to standard format
+    posts = transform_moltbook_posts(api_response)
     
     result = {
         "url": url,
+        "submolt": submolt,
         "posts": posts,
         "post_count": len(posts),
-        "time_period": "past 24 hours",
-        "scraped_at": datetime.utcnow().isoformat() + "Z"
+        "sort": "hot",
+        "fetched_at": datetime.utcnow().isoformat() + "Z"
     }
     
-    logger.info(f"Scraped {len(posts)} posts from {url}")
+    logger.info(f"Fetched {len(posts)} posts from m/{submolt}")
     return result
 
 
@@ -255,9 +258,9 @@ Your analysis should:
 3. Highlight any notable developments, concerns, or announcements
 
 write your response in the following format (as a JSON object): 
-{"title": "Lorem ipsum title",
+{{"title": "Lorem ipsum title",
 "summary": "Short summary here.",
-"content": "Full article content text goes here."}"""
+"content": "Full article content text goes here."}}"""
 
     logger.debug(f"Sending analysis prompt to LLM")
     resp = llm.complete(prompt, formatted=True)
