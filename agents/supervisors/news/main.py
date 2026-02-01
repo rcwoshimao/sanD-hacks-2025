@@ -156,6 +156,7 @@ async def handle_stream_prompt(request: PromptRequest):
         raise HTTPException(status_code=400, detail=str(ve))
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Operation failed: {str(e)}")
+
 @app.get("/health")
 async def health_check():
     return {"status": "ok"}
