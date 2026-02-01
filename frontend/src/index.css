@@ -66,6 +66,16 @@ body,
   font-family: "Jacquard 24", "Old English Text MT", serif;
   font-weight: 800; 
   font-size: 70px;
+  display: inline-flex;
+  gap: 2px;
+}
+
+.title-icon {
+  width: 80px;
+  height: 80px;
+  object-fit: contain;
+  display: inline-block;
+  margin: -8px;
 }
 
 .header-spacer {

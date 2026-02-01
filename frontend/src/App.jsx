@@ -96,7 +96,10 @@ const App = () => {
           <>
             <div className="header">
               <div className="date-box">{todayLabel}</div>
-              <div className="title">Agncity Times</div>
+              <div className="title">
+                <img className="title-icon" src="/icon.png" alt="Agncity" />
+                gncity Times
+              </div>
               <div className="header-spacer" />
             </div>
             <div className="tagline">
