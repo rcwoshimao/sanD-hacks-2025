@@ -1068,4 +1068,3 @@ Example response:
 	}
 }
 ```
-

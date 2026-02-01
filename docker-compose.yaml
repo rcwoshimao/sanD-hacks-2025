@@ -1,62 +1,4 @@
 services:
-  brazil-farm-server:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.brazil-farm
-    image: ghcr.io/agntcy/coffee-agntcy/brazil-farm:latest
-    container_name: brazil-farm-server
-    env_file:
-      - .env
-    environment:
-      - FARM_AGENT_HOST=brazil-farm-server
-      - FARM_AGENT_PORT=9999
-      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
-      - TRANSPORT_SERVER_ENDPOINT=${TRANSPORT_SERVER_ENDPOINT:-nats://nats:4222}
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - IDENTITY_AUTH_ENABLED=disabled
-      - ENABLE_HTTP=true
-    ports:
-      - "9999:9999"
-  colombia-farm-server:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.colombia-farm
-    image: ghcr.io/agntcy/coffee-agntcy/colombia-farm:latest
-    container_name: colombia-farm-server
-    env_file:
-      - .env
-    environment:
-      - FARM_AGENT_HOST=colombia-farm-server
-      - FARM_AGENT_PORT=9998
-      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
-      - TRANSPORT_SERVER_ENDPOINT=${TRANSPORT_SERVER_ENDPOINT:-nats://nats:4222}
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-      - IDENTITY_AUTH_ENABLED=${IDENTITY_AUTH_ENABLED:-} # Disabled by default
-      - IDENTITY_SERVICE_API_KEY=${IDENTITY_SERVICE_API_KEY_COLOMBIA_FARM:-dummy_api_key}
-      - MCP_PAYMENT_SERVICE_URL=${MCP_PAYMENT_SERVICE_URL:-http://payment-mcp-server:8081/mcp}
-    ports:
-      - "9998:9998"
-  vietnam-farm-server:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.vietnam-farm
-    image: ghcr.io/agntcy/coffee-agntcy/vietnam-farm:latest
-    container_name: vietnam-farm-server
-    env_file:
-      - .env
-    environment:
-      - FARM_AGENT_HOST=vietnam-farm-server
-      - FARM_AGENT_PORT=9997
-      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
-      - TRANSPORT_SERVER_ENDPOINT=${TRANSPORT_SERVER_ENDPOINT:-nats://nats:4222}
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-      - IDENTITY_AUTH_ENABLED=${IDENTITY_AUTH_ENABLED:-} # Disabled by default
-      - IDENTITY_SERVICE_API_KEY=${IDENTITY_SERVICE_API_KEY_VIETNAM_FARM:-dummy_api_key}
-      - MCP_PAYMENT_SERVICE_URL=${MCP_PAYMENT_SERVICE_URL:-http://payment-mcp-server:8081/mcp}
-    ports:
-      - "9997:9997"
   nats:
     image: nats:latest
     container_name: lungo-nats
@@ -78,29 +20,6 @@ services:
       - ./config/docker/slim/server-config.yaml:/config.yaml
     command: ["/slim", "--config", "/config.yaml"]
 
-  # auction supervisor App (farm client)
-  auction-supervisor:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.auction-supervisor
-    image: ghcr.io/agntcy/coffee-agntcy/auction-supervisor:latest
-    container_name: auction-supervisor
-    # volumes:
-    #   # Mount local git metadata so /build/info can derive latest tag/date in dev
-    #   - ../../../.git:/app/.git:ro
-    env_file:
-      - .env
-    environment:
-      - FARM_AGENT_HOST=farm-server
-      - FARM_AGENT_PORT=9999
-      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
-      - TRANSPORT_SERVER_ENDPOINT=${TRANSPORT_SERVER_ENDPOINT:-nats://nats:4222}
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - IDENTITY_AUTH_ENABLED=${IDENTITY_AUTH_ENABLED:-} # Disabled by default
-      - IDENTITY_SERVICE_API_KEY=${IDENTITY_SERVICE_API_KEY_AUCTION_SUPERVISOR:-dummy_api_key}
-    ports:
-      - "8000:8000"
-
   ui:
     build:
       context: ../../..
@@ -111,8 +30,6 @@ services:
       - VITE_EXCHANGE_APP_API_URL=http://127.0.0.1:8000
       - VITE_LOGISTICS_APP_API_URL=http://127.0.0.1:9090
       - VITE_GRAFANA_URL=http://127.0.0.1:3001
-    depends_on:
-      - auction-supervisor
     ports:
       - "3000:3000"
 
@@ -202,77 +119,6 @@ services:
     depends_on:
       clickhouse-server:
         condition: service_healthy
-
-  logistics-shipper:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.logistics-shipper
-    image: ghcr.io/agntcy/coffee-agntcy/logistics-shipper:latest
-    container_name: logistics-shipper
-    environment:
-      - DEFAULT_MESSAGE_TRANSPORT=SLIM # Do not change. SLIM is required for group conversation.
-      - TRANSPORT_SERVER_ENDPOINT=http://slim:46357
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-    ports:
-      - "9091:9091"
-
-  logistics-accountant:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.logistics-accountant
-    image: ghcr.io/agntcy/coffee-agntcy/logistics-accountant:latest
-    container_name: logistics-accountant
-    environment:
-      - DEFAULT_MESSAGE_TRANSPORT=SLIM # Do not change. SLIM is required for group conversation.
-      - TRANSPORT_SERVER_ENDPOINT=http://slim:46357
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-    ports:
-      - "9092:9092"
-
-  logistics-farm:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.logistics-farm
-    image: ghcr.io/agntcy/coffee-agntcy/logistics-farm:latest
-    container_name: logistics-farm
-    environment:
-      - DEFAULT_MESSAGE_TRANSPORT=SLIM # Do not change. SLIM is required for group conversation.
-      - TRANSPORT_SERVER_ENDPOINT=http://slim:46357
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-    ports:
-      - "9093:9093"
-
-  logistics-helpdesk:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.logistics-helpdesk
-    image: ghcr.io/agntcy/coffee-agntcy/logistics-helpdesk:latest
-    container_name: logistics-helpdesk
-    environment:
-      - DEFAULT_MESSAGE_TRANSPORT=SLIM # Do not change. SLIM is required for group conversation.
-      - TRANSPORT_SERVER_ENDPOINT=http://slim:46357
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-      - ENABLE_HTTP=true
-    ports:
-      - "9094:9094"
-
-  logistics-supervisor:
-    build:
-      context: ../../..
-      dockerfile: coffeeAGNTCY/coffee_agents/lungo/docker/Dockerfile.logistics-supervisor
-    image: ghcr.io/agntcy/coffee-agntcy/logistics-supervisor:latest
-    container_name: logistics-supervisor
-    env_file:
-      - .env
-    environment:
-      - DEFAULT_MESSAGE_TRANSPORT=SLIM # Do not change. SLIM is required for group conversation.
-      - TRANSPORT_SERVER_ENDPOINT=http://slim:46357
-      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-http://otel-collector:4318}
-    ports:
-      - "9090:9090"
 
   # News Supervisor App
   news-supervisor:
