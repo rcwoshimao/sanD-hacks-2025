@@ -166,6 +166,52 @@ services:
     depends_on:
       - nats
 
+  # Moltbook Supervisor App
+  moltbook-supervisor:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.moltbook-supervisor
+    image: ghcr.io/agntcy/coffee-agntcy/moltbook-supervisor:latest
+    container_name: moltbook-supervisor
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
+      - TRANSPORT_SERVER_ENDPOINT=nats://nats:4222  # Force Docker service name, ignore .env
+      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-}
+    ports:
+      - "8003:8003"
+    volumes:
+      - ./agents/supervisors/moltbook:/app/agents/supervisors/moltbook:ro
+      - ./agents/moltbook:/app/agents/moltbook:ro
+      - ./common:/app/common:ro
+      - ./config:/app/config:ro
+    depends_on:
+      - nats
+
+  # Moltbook Community Worker
+  moltbook-worker:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.moltbook-community-worker
+    image: ghcr.io/agntcy/coffee-agntcy/moltbook-worker:latest
+    container_name: moltbook-worker
+    env_file:
+      - .env
+    environment:
+      - DEFAULT_MESSAGE_TRANSPORT=${DEFAULT_MESSAGE_TRANSPORT:-NATS}
+      - TRANSPORT_SERVER_ENDPOINT=nats://nats:4222  # Force Docker service name, ignore .env
+      - OTLP_HTTP_ENDPOINT=${OTLP_HTTP_ENDPOINT:-}
+      - ENABLE_HTTP=false
+    ports:
+      - "9002:9002"
+    volumes:
+      - ./agents/moltbook:/app/agents/moltbook:ro
+      - ./common:/app/common:ro
+      - ./config:/app/config:ro
+    depends_on:
+      - nats
+
   mce-api-layer:
     image: ghcr.io/agntcy/obs-api:0.1.1
     container_name: lungo-mce-api-layer
