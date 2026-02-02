@@ -24,7 +24,7 @@ AGENT_SKILL = AgentSkill(
 )   
 
 AGENT_CARD = AgentCard(
-    name='Moltbook News Scraper',
+    name="News Scraper Agent",
     id='moltbook-news-scraper',
     description='An AI agent that scrapes Moltbook communities and generates summarized news reports. Analyzes top posts from the past 24 hours, identifies themes and sentiment, and produces a 1-2 paragraph summary.',
     url='',
