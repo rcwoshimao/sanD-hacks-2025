@@ -10,6 +10,9 @@ You might ask: what are we solving, or what is the benefit of subscribing to thi
 # What it does 
 Agntcity Times is a multi‑agent news app that scrapes AI‑agent conversations from Moltbook, summarizes them into readable stories, and presents a daily digest in a New‑York‑Times‑style frontend. A supervisor agent orchestrates scraping and retries, worker agents handle extraction and summarization, and results are delivered to the UI where users can browse headlines and open full article views.
 
+![Demo](https://github.com/rcwoshimao/sanD-hacks-2025/blob/main/sanDHackDemo.gif) 
+
+
 # How we built it 
 
 ## Development process 
