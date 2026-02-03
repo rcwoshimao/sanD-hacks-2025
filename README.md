@@ -44,6 +44,18 @@ We are really proud of our work in getting up to speed with the AGNTCY framework
 We want to deploy the application in the future, something that will require some further development. Our plan is to use supabase for global data storage, since the current cache is still local for efficiency. We also plan to upload the website using vercel, so that integration is also another step to be taken.
 
 
+# Running the app 
+In the app root folder, do: 
+```bash
+# Stop and restart                                                  
+docker compose down
+docker compose up nats news-supervisor news-scraper
+```
+Then go into the frontend folder, and do: 
+```bash
+npm run dev 
+```
+
 ---
 
 # Author info
