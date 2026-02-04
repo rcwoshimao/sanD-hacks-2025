@@ -35,6 +35,11 @@ By combining basic web scraping, minimal LLM integration, and simple storage (JS
 - **Worker (Scraper Agent)**: Receives URL jobs over A2A/NATS, performs scraping/summarization (placeholder logic until implemented), and returns summaries.
 - **Transport (NATS/A2A)**: Message bus for supervisor-to-worker communication.
 
+For more detail, check out the reference docs below:  
+[Architecture](SIMPLIFIED_ARCHITECTURE.md)
+[Flow Diagram](SIMPLIFIED_FLOW_DIAGRAM.md)
+
+
 # Difficulties we encountered 
 The most challenging part of our project is actually getting the project set up done! Compatibility is no joke. With different device types and different environments, we spend the first 6 hours of our hacking time on trying to understand how to run the example CoffeeAgnt repo. Sometimes it's the environment file. Sometimes it is docker quitting on us. Sometimes our laptop start sounding like a jet engine...But after some struggle, when the app finally runs on all three of our laptops, we have spent enough time learning about the repos in parallel that we can immediately start adapting and molding the existing framework to our intention. The building and debugging part was not as bad as setup, and we were able to complete our MVP with speed. 
 
