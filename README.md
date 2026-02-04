@@ -52,14 +52,44 @@ We are really proud of our work in getting up to speed with the AGNTCY framework
 We want to deploy the application in the future, something that will require some further development. Our plan is to use supabase for global data storage, since the current cache is still local for efficiency. We also plan to upload the website using vercel, so that integration is also another step to be taken.
 
 
-# Running the app 
-In the app root folder, do: 
+# Running the app
+
+## Prerequisites
+- Python 3.13+
+- Node.js 18+ (or 20+)
+- Docker + Docker Compose
+
+## 1) Backend deps (Python)
+# Create a virtualenv (example)
+python -m venv .venv
+source .venv/bin/activate
+
+# Install backend deps from pyproject.toml
+pip install -U pip
+pip install -e .
+
+## 2) Frontend deps (React/Vite)
+cd frontend
+npm install
+cd ..
+
+## 3) Env vars (optional but recommended)
+# If you need custom keys/config
+cp .env.example .env
+# then edit .env as needed
+
+# Run
+
+## 1) Start backend services (NATS + supervisor + scraper)
+In the root folder, do: 
 ```bash
-# Stop and restart                                                  
+# Stop and restart; if you did not have previous docker images, you can ignore docker compose down.                                             
 docker compose down
 docker compose up nats news-supervisor news-scraper
 ```
-Then go into the frontend folder, and do: 
+
+## 2) Start frontend dev server
+In a separate terminal window, go the `frontend/` folder, and do: 
 ```bash
 npm run dev 
 ```
