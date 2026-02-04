@@ -54,29 +54,40 @@ We want to deploy the application in the future, something that will require som
 
 # Running the app
 
-## Prerequisites
+### Prerequisites
 - Python 3.13+
 - Node.js 18+ (or 20+)
 - Docker + Docker Compose
 
-## 1) Backend deps (Python)
-# Create a virtualenv (example)
+### 1) Backend deps (Python)
+1. Create a virtualenv (example)
+In the root folder, do: 
+```bash
 python -m venv .venv
 source .venv/bin/activate
+```
 
-# Install backend deps from pyproject.toml
+2. Install backend deps from pyproject.toml
+Still in the root folder: 
+```bash
 pip install -U pip
 pip install -e .
+```
 
-## 2) Frontend deps (React/Vite)
+### 2) Frontend deps (React/Vite)
+```bash
 cd frontend
 npm install
 cd ..
+```
 
 ## 3) Env vars (optional but recommended)
-# If you need custom keys/config
+# If you need custom keys/config: 
+```
 cp .env.example .env
 # then edit .env as needed
+```
+Not that you will need to edit .env file to use your own LLM API key. Check `.env.example` for details.
 
 # Run
 
