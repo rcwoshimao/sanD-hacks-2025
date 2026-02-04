@@ -12,6 +12,58 @@ Agntcity Times is a multi‑agent news app that scrapes AI‑agent conversations
 
 ![Demo](https://github.com/rcwoshimao/sanD-hacks-2025/blob/main/sanDHackDemo.gif) 
 
+---
+# Running the app
+
+### Prerequisites
+- Python 3.13+
+- Node.js 18+ (or 20+)
+- Docker + Docker Compose
+
+### 1) Backend deps (Python)
+1. Create a virtualenv (example)
+In the root folder, do: 
+```bash
+python -m venv .venv
+source .venv/bin/activate
+```
+
+2. Install backend deps from pyproject.toml
+Still in the root folder: 
+```bash
+pip install -U pip
+pip install -e .
+```
+
+### 2) Frontend deps (React/Vite)
+```bash
+cd frontend
+npm install
+cd ..
+```
+
+### 3) Env vars (optional but recommended)
+If you need custom keys/config: 
+```
+cp .env.example .env
+# then edit .env as needed
+```
+Not that you will need to edit .env file to use your own LLM API key. Check `.env.example` for details.
+
+### 4) Running the app    
+1. Start backend services (NATS + supervisor + scraper)
+In the root folder, do: 
+```bash
+# Stop and restart; if you did not have previous docker images, you can ignore docker compose down.                                             
+docker compose down
+docker compose up nats news-supervisor news-scraper
+```
+2. Start frontend dev server   
+In a separate terminal window, go the `frontend/` folder, and do: 
+```bash
+npm run dev 
+```
+---
 
 # How we built it 
 
@@ -50,60 +102,6 @@ We are really proud of our work in getting up to speed with the AGNTCY framework
 
 # What's next for Agntcity Times
 We want to deploy the application in the future, something that will require some further development. Our plan is to use supabase for global data storage, since the current cache is still local for efficiency. We also plan to upload the website using vercel, so that integration is also another step to be taken.
-
-
-# Running the app
-
-### Prerequisites
-- Python 3.13+
-- Node.js 18+ (or 20+)
-- Docker + Docker Compose
-
-### 1) Backend deps (Python)
-1. Create a virtualenv (example)
-In the root folder, do: 
-```bash
-python -m venv .venv
-source .venv/bin/activate
-```
-
-2. Install backend deps from pyproject.toml
-Still in the root folder: 
-```bash
-pip install -U pip
-pip install -e .
-```
-
-### 2) Frontend deps (React/Vite)
-```bash
-cd frontend
-npm install
-cd ..
-```
-
-## 3) Env vars (optional but recommended)
-# If you need custom keys/config: 
-```
-cp .env.example .env
-# then edit .env as needed
-```
-Not that you will need to edit .env file to use your own LLM API key. Check `.env.example` for details.
-
-# Run
-
-## 1) Start backend services (NATS + supervisor + scraper)
-In the root folder, do: 
-```bash
-# Stop and restart; if you did not have previous docker images, you can ignore docker compose down.                                             
-docker compose down
-docker compose up nats news-supervisor news-scraper
-```
-
-## 2) Start frontend dev server
-In a separate terminal window, go the `frontend/` folder, and do: 
-```bash
-npm run dev 
-```
 
 ---
 
